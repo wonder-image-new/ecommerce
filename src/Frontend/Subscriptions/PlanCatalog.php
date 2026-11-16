@@ -70,7 +70,7 @@ final class PlanCatalog
 
             $features = self::rows(PlanFeature::find(['product_model_id' => $id, 'deleted' => 'false'], null, 'position', 'ASC'));
             $images = array_values(array_filter(
-                ProductImages::for(self::rows(ProductImage::find(['product_model_id' => $id, 'deleted' => 'false'], null, 'position', 'ASC')), 0),
+                ProductImages::for(ProductImages::hydrate(self::rows(ProductImage::find(['product_model_id' => $id, 'deleted' => 'false'], null, 'position', 'ASC'))), 0),
                 [ProductImages::class, 'isShowable'],
             ));
         } catch (Throwable) {
