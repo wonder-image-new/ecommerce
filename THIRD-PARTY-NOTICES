@@ -1,0 +1,13 @@
+Componenti di terzi usati da questo software.
+Ogni componente resta regolato dalla propria licenza.
+
+PHP
+Nessun componente di terzi dichiarato direttamente in composer.json. Le dipendenze di terzi arrivano da wonder-image/app: vedi il file THIRD-PARTY-NOTICES di quel pacchetto.
+
+Componenti inclusi nel repository
+resources/assets/payment-icons  -  MIT (file LICENSE nella cartella; icone di activemerchant/payment_icons e logo Link di Stripe)
+
+Solo sviluppo, non distribuiti
+Nessuno.
+
+Pacchetti dello stesso Titolare, regolati dalla loro licenza: wonder-image/app, wonder-image/customer-account, wonder-image/gestionale
