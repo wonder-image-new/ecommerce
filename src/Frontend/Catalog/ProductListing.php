@@ -265,12 +265,13 @@ final class ProductListing
         $price = $prices !== [] ? min($prices) : 0.0;
         $regular = $regularPrices !== [] ? min($regularPrices) : $price;
         $onSale = $price > 0 && $price < $regular;
-        $allImages = self::rows(ProductImage::find(
+        // Una lettura sola per i media della libreria.
+        $allImages = ProductImages::hydrate(self::rows(ProductImage::find(
             ['product_model_id' => $modelId, 'deleted' => 'false'],
             null,
             'position',
             'ASC'
-        ));
+        )));
         $firstVariant = $selectedVariant ?? $variants[0];
         $images = ProductImages::for($allImages, (int) $firstVariant['id']);
         $firstImage = $images[0] ?? [];

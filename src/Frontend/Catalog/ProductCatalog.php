@@ -160,12 +160,12 @@ final class ProductCatalog
         }
 
         // Cancellate e fallite non vanno in galleria (come ProductPhotos per le righe).
-        $allImages = array_values(array_filter(self::rows(ProductImage::find(
+        $allImages = array_values(array_filter(ProductImages::hydrate(self::rows(ProductImage::find(
             ['product_model_id' => $modelId, 'deleted' => 'false'],
             null,
             'position',
             'ASC'
-        )), [ProductImages::class, 'isShowable']));
+        ))), [ProductImages::class, 'isShowable']));
         $images = [];
 
         foreach (ProductImages::for($allImages, $variantId) as $image) {
@@ -616,8 +616,9 @@ final class ProductCatalog
                 }
 
                 if ($type === 'icon') {
-                    foreach ($values as $value) {
-                        $image = AttributeValue::imageUrl($value);
+                    $media = AttributeValue::mediaMany($values, 'image');
+                    foreach ($values as $key => $value) {
+                        $image = AttributeValue::mediaUrl($value, 'image', $media[$key] ?? null);
                         if ($image !== '') {
                             $sheet['icons'][] = ['name' => trim((string) $value['label']), 'image' => $image];
                         }
