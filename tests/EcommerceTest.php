@@ -160,7 +160,7 @@ check('il login manuale di un account solo federato manda la mail del provider, 
 
     foreach (['it', 'en'] as $locale) {
         $mail = json_decode((string) file_get_contents($core.'/resources/lang/'.$locale.'/auth.json'), true)['email'] ?? [];
-        if (!isset($mail['federated_subject'], $mail['federated_body'])) {
+        if (!isset($mail['federated_subject'], $mail['federated_text'], $mail['federated_button'])) {
             return false;
         }
     }
@@ -170,7 +170,7 @@ check('il login manuale di un account solo federato manda la mail del provider, 
         && str_contains($controller, 'hasLocalPassword')
         && str_contains($controller, 'federatedProviderForUser')
         && str_contains($controller, "__t('auth.email.federated_subject')")
-        && str_contains($controller, "__t('auth.email.federated_body'")
+        && str_contains($controller, "__t('auth.email.federated_text'")
         && !str_contains($controller, 'use_federated_login_');
 });
 
