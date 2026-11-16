@@ -129,6 +129,15 @@ final class CartSession
             && in_array('client', (array) ($user->authority ?? []), true);
     }
 
+    /**
+     * L'utente solo se è un cliente entrato nel negozio, altrimenti null:
+     * un admin col backend aperto ordina come ospite, senza la sua email.
+     */
+    public static function customer(): ?object
+    {
+        return self::authenticated() ? self::user() : null;
+    }
+
     public static function customerId(): int
     {
         if (!self::authenticated()) {

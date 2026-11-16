@@ -70,6 +70,13 @@ versionamento semantico.
 
 ### Corretto
 
+- **Checkout con un admin in sessione.** Checkout e barra rapida prendevano
+  l'utente con `CartSession::user()`, anche quando non era un cliente: con il
+  backend aperto l'email dell'admin finiva sull'ordine e l'ordine da ospite
+  veniva fermato con «accedi al tuo account». Ora usano
+  `CartSession::customer()`, che dà l'utente solo al cliente entrato e null
+  agli altri: l'ospite ordina con l'email del modulo.
+
 - Carrello e mini carrello, prodotti: togliere una riga o calarne la
   quantità manda `remove_from_cart`, alzarla `add_to_cart`
   (`CartPresenter::changeEvent()`, coi dati del server). Prima non partiva

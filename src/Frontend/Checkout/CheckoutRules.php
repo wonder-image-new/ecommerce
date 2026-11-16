@@ -100,6 +100,7 @@ final class CheckoutRules
      * (prefisso e numero) è anche quello del corriere, col ritiro non resta
      * un indirizzo vecchio (né il suo place ID), con l'accesso fatto l'email è quella dell'utente.
      * La fatturazione arriva già decisa: le tasse si calcolano su quella.
+     * `$user` è CartSession::customer(): null per l'ospite, anche con un admin in sessione.
      *
      * @param array<string, mixed> $post
      * @return array<string, mixed>

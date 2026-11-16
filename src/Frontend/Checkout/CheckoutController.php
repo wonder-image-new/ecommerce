@@ -99,8 +99,8 @@ final class CheckoutController
         // Si riusa solo la pagina fatta dal carrello: col modulo tornato indietro l'anteprima riscrive i valori.
         $page = CheckoutSnapshot::page(
             $cart,
-            CheckoutRules::post($values, CartSession::user()),
-            CartSession::user(),
+            CheckoutRules::post($values, CartSession::customer()),
+            CartSession::customer(),
             $formState === [],
             $formState === [] && !$chosen
                 ? self::firstPost(...)
@@ -114,7 +114,7 @@ final class CheckoutController
         if (!$products && !$services) {
             self::redirect(self::route('ecommerce.cart.index'));
         }
-        $user = CartSession::user();
+        $user = CartSession::customer();
         $billing = Order::billingAddress()->formSchema($values['billing_country'] ?? null);
 
         self::seo((string) __t('ecommerce.checkout.title'), self::route('ecommerce.checkout.index'));
@@ -142,7 +142,7 @@ final class CheckoutController
             'express' => $services ? [] : ExpressCheckout::buttons((array) ($cart['order'] ?? [])),
             'products' => $products,
             'subscriptions' => $services,
-            'user_email' => CartSession::authenticated() ? trim((string) ($user->email ?? '')) : '',
+            'user_email' => trim((string) ($user->email ?? '')),
             'guest' => !CartSession::authenticated(),
         ])->render();
     }
@@ -157,7 +157,7 @@ final class CheckoutController
      */
     public static function firstPost(array $cart): array
     {
-        return CheckoutRules::post(self::pageValues($cart, []), CartSession::user());
+        return CheckoutRules::post(self::pageValues($cart, []), CartSession::customer());
     }
 
     /**
@@ -217,8 +217,8 @@ final class CheckoutController
             self::leave(self::loginUrl(), $json, 401);
         }
 
-        $post = CheckoutRules::post(self::formPost(), CartSession::user());
-        $user = CartSession::user();
+        $post = CheckoutRules::post(self::formPost(), CartSession::customer());
+        $user = CartSession::customer();
 
         try {
             if (!CartSession::authenticated()) {
@@ -314,7 +314,7 @@ final class CheckoutController
         CheckoutSnapshot::forget();
 
         try {
-            self::json(['success' => true] + CheckoutSummary::payload($cartId, CheckoutRules::post(self::formPost(), CartSession::user()), CartSession::user()));
+            self::json(['success' => true] + CheckoutSummary::payload($cartId, CheckoutRules::post(self::formPost(), CartSession::customer()), CartSession::customer()));
         } catch (Throwable $error) {
             Errors::internal($error, 'ecommerce.checkout.summary');
             self::json(['success' => false, 'error' => (string) __t('ecommerce.checkout.summary_error')], 500);
@@ -344,11 +344,11 @@ final class CheckoutController
             if ($action === 'apply' && !self::couponAllowed($cartId)) {
                 // Troppi codici sbagliati: niente tentativo, il riepilogo torna com'è.
                 $status = 429;
-                $payload = CheckoutSummary::payload($cartId, $_POST, CartSession::user(), !$json)
+                $payload = CheckoutSummary::payload($cartId, $_POST, CartSession::customer(), !$json)
                     + ['error' => (string) __t('ecommerce.checkout.errors.too_many_coupons')];
             } else {
                 // Senza JavaScript il form del coupon non porta il resto del modulo: valgono le scelte del carrello.
-                $payload = CheckoutSummary::coupon($cartId, $action, $code, $_POST, CartSession::user(), !$json);
+                $payload = CheckoutSummary::coupon($cartId, $action, $code, $_POST, CartSession::customer(), !$json);
                 if ($action === 'apply' && $payload['error'] !== '') {
                     self::couponFailed($cartId);
                 }
@@ -638,7 +638,7 @@ final class CheckoutController
         }
 
         try {
-            $payload = CheckoutSummary::payload($cartId, CheckoutRules::post(self::formPost(), CartSession::user()), CartSession::user());
+            $payload = CheckoutSummary::payload($cartId, CheckoutRules::post(self::formPost(), CartSession::customer()), CartSession::customer());
         } catch (Throwable $error) {
             Errors::internal($error, 'ecommerce.checkout.reopen');
             self::json(['success' => false, 'error' => (string) __t('ecommerce.checkout.summary_error')], 500);
@@ -748,7 +748,7 @@ final class CheckoutController
             return array_map(static fn (mixed $value): string => is_scalar($value) ? (string) $value : '', $submitted);
         }
 
-        $user = CartSession::user();
+        $user = CartSession::customer();
         if (!CartSession::authenticated()) {
             return ['billing_country' => 'IT', 'shipping_country' => 'IT'];
         }
@@ -887,7 +887,7 @@ final class CheckoutController
         if (!Csrf::verify()) {
             if ($remember) {
                 self::rememberErrors([], Csrf::oldInput(
-                    CheckoutRules::rememberedPost(CheckoutRules::post(self::formPost(), CartSession::user()), $_POST),
+                    CheckoutRules::rememberedPost(CheckoutRules::post(self::formPost(), CartSession::customer()), $_POST),
                     self::SECRET_FIELDS
                 ));
             }

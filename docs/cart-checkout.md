@@ -49,7 +49,9 @@ Le regole stanno in `Checkout\CheckoutRules`:
 
 - `post()` prepara il POST per il carrello: il telefono del contatto vale anche
   per il corriere, col ritiro si svuota l'indirizzo, con l'accesso l'email è
-  quella dell'utente;
+  quella dell'utente. L'utente arriva da `CartSession::customer()`: è null se
+  chi ordina non è un cliente entrato nel negozio, quindi un admin con il
+  backend aperto ordina come ospite con l'email scritta nel modulo;
 - `deliveryErrors()` dice cosa manca alla consegna;
 - `billing()` costruisce la fatturazione: di partenza è «uguale all'indirizzo
   di spedizione»; col ritiro o con «indirizzo diverso» usa i campi compilati;
