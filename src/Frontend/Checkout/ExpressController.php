@@ -59,7 +59,7 @@ final class ExpressController
             if ($guest) {
                 ExpressVerification::mark($cartId);
             }
-            $order = CheckoutSummary::payload($cartId, ['fulfillment_type' => 'shipping'], CartSession::user())['order'];
+            $order = CheckoutSummary::payload($cartId, ['fulfillment_type' => 'shipping'], CartSession::customer())['order'];
         } catch (RecaptchaChallenge $e) {
             // Punteggio basso: il JavaScript apre la casella sotto i bottoni.
             self::json(['success' => false, 'status' => RecaptchaChallenge::CHALLENGE_CODE, 'message' => $e->getMessage()], 422);
@@ -112,13 +112,13 @@ final class ExpressController
         }
 
         try {
-            $payload = CheckoutSummary::payload($cartId, $post, CartSession::user());
+            $payload = CheckoutSummary::payload($cartId, $post, CartSession::customer());
             $options = (array) $payload['shipping_methods']['options'];
             $selected = (int) $payload['shipping_methods']['selected'];
             // Stripe dà per scelta la prima tariffa: il totale deve già contarla.
             if ($shipping && $options !== [] && !in_array($selected, array_map('intval', array_column($options, 'method_id')), true)) {
                 $selected = (int) $options[0]['method_id'];
-                $payload = CheckoutSummary::payload($cartId, ['shipping_method_id' => (string) $selected] + $post, CartSession::user());
+                $payload = CheckoutSummary::payload($cartId, ['shipping_method_id' => (string) $selected] + $post, CartSession::customer());
             }
         } catch (Throwable $error) {
             Errors::internal($error, 'ecommerce.express.shipping');
@@ -155,7 +155,7 @@ final class ExpressController
         $method = Checkout::expressMethod();
         $type = (string) ($_POST['type'] ?? '');
         $wallet = json_decode((string) ($_POST['wallet'] ?? ''), true, 8);
-        $user = CartSession::user();
+        $user = CartSession::customer();
         $contact = self::contact();
         $asked = CheckoutRules::askedConsents((int) ($user->id ?? 0));
 

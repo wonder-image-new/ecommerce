@@ -235,7 +235,7 @@ check('una modifica del cliente scarta le risposte in viaggio e la prima visita 
     return preg_match('/schedule\(\) \{\s*\/\/[^\n]*\n\s*this\.sequence\+\+;/', $js) === 1
         && str_contains($js, 'this.submit(this.latest)')
         && str_contains($c, '$formState === []')
-        && str_contains($c, 'CartSession::user(), !$json)')
+        && str_contains($c, 'CartSession::customer(), !$json)')
         && str_contains($view, 'CartPresenter::lines(');
 });
 
@@ -426,7 +426,7 @@ check('place passa dalle regole: POST pulito, errori insieme, solo i metodi offe
     $place = substr($c, (int) strpos($c, 'private static function place('))
         .(string) file_get_contents(dirname(__DIR__).'/src/Frontend/Checkout/CheckoutPlacement.php');
 
-    return str_contains($place, 'CheckoutRules::post(self::formPost(), CartSession::user())')
+    return str_contains($place, 'CheckoutRules::post(self::formPost(), CartSession::customer())')
         && str_contains($place, 'CheckoutRules::deliveryErrors(')
         && str_contains($place, 'CheckoutRules::paymentErrors(')
         && str_contains($place, 'CheckoutRules::method(')
@@ -437,7 +437,7 @@ check('place passa dalle regole: POST pulito, errori insieme, solo i metodi offe
 check('il riepilogo usa lo stesso POST della pagina', function (): bool {
     $c = (string) file_get_contents(dirname(__DIR__).'/src/Frontend/Checkout/CheckoutController.php');
 
-    return str_contains($c, 'CheckoutSummary::payload($cartId, CheckoutRules::post(self::formPost(), CartSession::user()), CartSession::user())');
+    return str_contains($c, 'CheckoutSummary::payload($cartId, CheckoutRules::post(self::formPost(), CartSession::customer()), CartSession::customer())');
 });
 
 check('la pagina unica ha le sezioni nell\'ordine giusto e il bottone nel form', function (): bool {
@@ -549,8 +549,8 @@ check('le tasse seguono la fatturazione: anteprima e prima visita passano dalle 
 
     // La prima visita passa dall'anteprima con il post delle regole, anche quando la riusa.
     return str_contains($c, 'CheckoutSnapshot::page(')
-        && str_contains($c, 'CheckoutRules::post($values, CartSession::user())')
-        && str_contains($c, 'CheckoutRules::post(self::pageValues($cart, []), CartSession::user())')
+        && str_contains($c, 'CheckoutRules::post($values, CartSession::customer())')
+        && str_contains($c, 'CheckoutRules::post(self::pageValues($cart, []), CartSession::customer())')
         && str_contains($s, 'CheckoutSummary::payload($cartId, $post, $user, $keepCart)')
         && str_contains($js, '[name^="billing_"]') && str_contains($js, '[name="same_as_shipping"]') && str_contains($js, '[name="invoice"]');
 });
@@ -1147,6 +1147,21 @@ check('nel riepilogo del carrello «Spedizione {paese}» al prezzo più basso, c
         && str_contains($js, 'cart.total_display')
         && is_string($it['cart']['shipping_to'] ?? null) && is_string($en['cart']['shipping_to'] ?? null)
         && !isset($it['cart']['shipping_excluded'], $en['cart']['shipping_excluded']);
+});
+
+check('checkout e barra rapida usano solo il cliente entrato: un admin in sessione ordina come ospite', function (): bool {
+    $dir = dirname(__DIR__).'/src/Frontend';
+    $session = (string) file_get_contents($dir.'/Cart/CartSession.php');
+    $checkout = (string) file_get_contents($dir.'/Checkout/CheckoutController.php')
+        .(string) file_get_contents($dir.'/Checkout/ExpressController.php');
+    // Senza utente l'email resta quella scritta nel modulo.
+    $guest = \Wonder\Plugin\Ecommerce\Frontend\Checkout\CheckoutRules::post(['email' => 'ospite@example.com']);
+    $client = \Wonder\Plugin\Ecommerce\Frontend\Checkout\CheckoutRules::post(['email' => 'altro@example.com'], (object) ['email' => 'cliente@example.com']);
+
+    return str_contains($session, 'return self::authenticated() ? self::user() : null;')
+        && !str_contains($checkout, 'CartSession::user()')
+        && $guest['email'] === 'ospite@example.com'
+        && $client['email'] === 'cliente@example.com';
 });
 
 summary();
