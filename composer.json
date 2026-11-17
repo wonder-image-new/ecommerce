@@ -5,9 +5,9 @@
     "license": "proprietary",
     "require": {
         "php": "^8.2",
-        "wonder-image/app": "^2.4.0-beta.5 || dev-main",
-        "wonder-image/customer-account": "@dev",
-        "wonder-image/gestionale": "@dev"
+        "wonder-image/app": "^2.4.0 || dev-main",
+        "wonder-image/customer-account": "^1.0 || dev-main",
+        "wonder-image/gestionale": "^1.0 || dev-main"
     },
     "repositories": [
         {
@@ -45,7 +45,7 @@
             "module": true
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
         "platform": {
