@@ -3,7 +3,7 @@
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/) e il
 versionamento semantico.
 
-## 0.2.0-beta.1 — non rilasciata
+## 1.0.0 — 2026-11-17
 
 ### Cambiato
 
