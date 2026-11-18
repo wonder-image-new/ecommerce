@@ -6,3 +6,8 @@
 # lock non vale su un'altra macchina né in CI. Si tornerà a tracciarlo quando il
 # gestionale dichiarerà una `version` nel suo composer.json, come fa il core.
 /composer.lock
+.claude/skills/
+.claude/worktrees/
+.claude/settings.local.json
+.agents/
+skills-lock.json
